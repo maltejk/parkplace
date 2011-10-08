@@ -92,6 +92,7 @@ module ParkPlace
               GemPlugin::Manager.instance.load "mongrel" => GemPlugin::INCLUDE
             end
 
+            @host = host
             config = Mongrel::Configurator.new :host => host do
                 listener :port => port do
                     uri "/", :handler => Mongrel::Camping::CampingHandler.new(ParkPlace)
@@ -107,6 +108,23 @@ module ParkPlace
             puts "** ParkPlace example is running at http://#{host}:#{port}/"
             puts "** Visit http://#{host}:#{port}/control/ for the control center."
             config.join
+        end
+
+        def run(r=$stdin,e=ENV)
+            X.M
+
+            if e['SERVER_NAME'] =~ %r{(.+)\.#{@host}$}
+                uri = "/#{$1}#{e['PATH_INFO']}"
+                e['PATH_INFO'] = uri
+                e['REQUEST_PATH'] = uri
+                e['REQUEST_URI'] = uri
+                e['SERVER_NAME'] = @host
+            end
+
+            k,a=X.D un("/#{e['PATH_INFO']}".gsub(/\/+/,'/'))
+            k.new(r,e,(m=e['REQUEST_METHOD']||"GET")).Y.service *a
+        rescue Object=>x
+            X::ServerError.new(r,e,'get').service(k,m,x)
         end
     end
 end
