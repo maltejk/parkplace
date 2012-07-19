@@ -236,6 +236,20 @@ module ParkPlace::Controllers
             @headers['X-Sendfile'] = File.join(ParkPlace::STATIC_PATH, path)
         end
     end
+
+    class CcssStatic < R '/control/s/css/(.+)'
+        def get(path)
+            @headers['Content-Type'] = MIME_TYPES[path[/\.\w+$/, 0]] || "text/plain"
+            @headers['X-Sendfile'] = File.join(ParkPlace::STATIC_PATH, path)
+        end
+    end
+
+    class CjsStatic < R '/control/s/js/(.+)'
+        def get(path)
+            @headers['Content-Type'] = MIME_TYPES[path[/\.\w+$/, 0]] || "text/plain"
+            @headers['X-Sendfile'] = File.join(ParkPlace::STATIC_PATH, path)
+        end
+    end
 end
 
 module ParkPlace::Views
@@ -248,11 +262,11 @@ module ParkPlace::Views
         html do
             head do
                 title { "Park Place Control Center &raquo; " + str }
-                script :language => 'javascript', :src => R(CStatic, 'js/jquery.js') do
+                script :language => 'javascript', :src => R(CjsStatic, 'jquery.js') do
                   text("")
                 end
                 # script :language => 'javascript', :src => R(CStatic, 'js/support.js')
-                style "@import '#{self / R(CStatic, 'css/control.css')}';", :type => 'text/css'
+                style "@import '#{self / R(CcssStatic, 'control.css')}';", :type => 'text/css'
             end
             body do
                 div.page! do
